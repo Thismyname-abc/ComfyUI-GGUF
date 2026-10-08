@@ -58,8 +58,9 @@ def get_gguf_metadata(reader):
             if len(field.types) == 1:  # Simple scalar fields only
                 if field.types[0] == gguf.GGUFValueType.STRING:
                     metadata[field_name] = str(field.parts[field.data[-1]], "utf-8")
-                elif field.types[0] == gguf.GGUFValueType.INT32:
-                    metadata[field_name] = int(field.parts[field.data[-1]])
+                elif field.types[0] in (gguf.GGUFValueType.INT32, gguf.GGUFValueType.UINT32):
+                    # UINT32 parts arrive as 1-element arrays, so unwrap before casting.
+                    metadata[field_name] = int(field.parts[field.data[-1]].reshape(-1)[0])
                 elif field.types[0] == gguf.GGUFValueType.F32:
                     metadata[field_name] = float(field.parts[field.data[-1]])
                 elif field.types[0] == gguf.GGUFValueType.BOOL:
